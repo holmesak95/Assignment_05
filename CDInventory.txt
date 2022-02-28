@@ -1,0 +1,113 @@
+#------------------------------------------#
+# Title: CDInventory.py
+# Desc: Starter Script for Assignment 05
+# Change Log: (Who, When, What)
+# DBiesinger, 2030-Jan-01, Created File
+# AHolmes, 2022-Feb-25, Updated code
+# AHolmes, 2022-Feb-27, Added in logic to load existing data and deleting an entry, also updated code to prevent duplicate entries
+#------------------------------------------#
+
+# Declare variables
+strChoice = ''                      # User input
+lstTbl = []                         # list of dicts to hold data
+# TODO replace list of lists with list of dicts
+dictRow = {}                         # dict of data row
+strFileName = 'CDInventory.txt'     # data storage file
+objFile = None                      # file object for reading
+
+# Get user Input
+print('The Magic CD Inventory\n')
+while True:
+    # 1. Display menu allowing the user to choose:
+    print('[l] load Inventory from file\n[a] Add CD\n[i] Display Current Inventory')
+    print('[d] delete CD from Inventory\n[s] Save Inventory to file\n[x] exit')
+    strChoice = input('l, a, i, d, s or x: ').lower()  # convert choice to lower case at time of input
+    print()
+
+    if strChoice == 'x':
+        # 5. Exit the program if the user chooses so
+        break
+    
+    if strChoice == 'l': # no elif necessary, as this code is only reached if strChoice is not 'exit'
+        # TODO Add the functionality of loading existing data
+        objFile = open(strFileName, 'r')
+        for row in objFile:
+            lstRow = row.strip().split(',')
+            dictRow = {'id': int(lstRow[0]), 'title': lstRow[1], 'artist': lstRow[2]}
+            if len(lstTbl) == 0:
+                lstTbl.append(dictRow)
+            else:
+                for tblRow in lstTbl:
+                    if (tblRow == dictRow):
+                        print(str(dictRow) + ' is already in the dataset.')
+                        break
+                    else:
+                        lstTbl.append(dictRow)
+                        break
+        objFile.close()
+        pass
+    
+    elif strChoice == 'a':  
+        # 2. Add data to the table (list of dicts) each time the user wants to add data
+        dictRow = {}
+        dictRow['id'] = int(input('Enter an ID: '))
+        dictRow['title'] = input('Enter the CD\'s Title: ')
+        dictRow['artist'] = input('Enter the Artist\'s Name: ')
+        lstTbl.append(dictRow)
+        
+    elif strChoice == 'i':
+        # 3. Display the current data to the user each time the user wants to display the data
+        print('ID, CD Title, Artist')
+        for row in lstTbl:
+            print(str(row), sep = ', ')
+            
+    elif strChoice == 'd':
+        # TODO Add functionality of deleting an entry
+        cdFoundInd = False
+        print('Please enter the following info to delete the CD:')
+        delID = int(input('Enter an ID: '))
+        delTitle = input('Enter the CD\'s Title: ')
+        delArtist = input('Enter the Artist\'s Name: ')
+        for row in lstTbl:
+            if ((int(row['id']) == delID) and (row['title'] == delTitle) and (row['artist'] == delArtist)):
+                lstTbl.remove(row)
+                cdFoundInd = True
+        if (cdFoundInd):
+            print('The CD was deleted!')
+        else:
+            print('The CD was not found!')
+        pass
+    
+    elif strChoice == 's':
+        # 4. Save the data to a text file CDInventory.txt if the user chooses
+        addToFileList = []
+        
+        # Read current CDs to avoid duplicates
+        for memDictRow in lstTbl:
+            skipFileInd = False
+            objFile = open(strFileName, 'r')
+            for row in objFile:
+                lstRow = row.strip().split(',')
+                fileDictRow = {'id': int(lstRow[0]), 'title': lstRow[1], 'artist': lstRow[2]}
+                if memDictRow == fileDictRow:
+                    skipFileInd = True
+                    break
+            objFile.close()
+            if not skipFileInd:
+                addToFileList.append(memDictRow)
+            
+        for row in addToFileList:
+            print('The following CD will be added to the file')
+            print(row)
+            strRow = ''
+            for col in row:
+                strRow += str(row[col]) + ','
+            strRow = strRow[:-1] + '\n'
+            objFile = open(strFileName, 'a')
+            objFile.write(strRow)
+            objFile.close()
+        print('\nNon-duplicate data has been written to CDInventory.txt\n')
+        
+    else:
+        print('Please choose either l, a, i, d, s or x!')
+
